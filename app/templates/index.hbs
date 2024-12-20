@@ -1,0 +1,13 @@
+<header>
+  <img src="/logo.png" alt="truth" class="logo">
+  <h1 class="header-title">Lies</h1>
+</header>
+<div class="container">
+  <div class="column">
+    {{#each this.model as |lie|}}
+      <LinkTo @route="truth" @model={{lie.id}} class="button red-button">
+        {{lie.text}}
+      </LinkTo>
+    {{/each}}
+  </div>
+</div>

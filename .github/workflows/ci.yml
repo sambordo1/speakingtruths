@@ -45,3 +45,8 @@ jobs:
         run: npm ci
       - name: Run Tests
         run: npm test
+
+
+# aws s3 cp backend/truth-sets.json s3://truth-db/ --profile sammy
+# ember build --environment=production
+# aws s3 sync dist/ s3://speakingtruths.com/ --profile sammy

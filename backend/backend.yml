@@ -1,0 +1,176 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CloudFormation template for "truth-backend":
+  - S3 bucket for truth sets JSON
+  - Lambda function to serve data
+  - API Gateway to expose the Lambda as an HTTP endpoint
+
+# Parameters:
+#   # No parameters needed for this basic setup, but you can add if you want flexibility.
+
+Resources:
+
+  TruthBackendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: truth-backend-bucket
+      AccessControl: Private
+    DeletionPolicy: Retain  # So the bucket isn't deleted accidentally
+
+  TruthBackendFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: truth-backend-function-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: S3ReadAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub "arn:aws:s3:::truth-backend-bucket/truth-sets.json"
+
+  TruthBackendFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: truth-backend-function
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt TruthBackendFunctionRole.Arn
+      Code:
+        ZipFile: |
+          const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+
+          // Initialize the S3 client
+          const s3 = new S3Client();
+
+          const BUCKET = 'truth-backend-bucket';
+          const KEY = 'truth-sets.json';
+
+          exports.handler = async (event) => {
+            try {
+              // Use the S3 client to get the object
+              const command = new GetObjectCommand({ Bucket: BUCKET, Key: KEY });
+              const data = await s3.send(command);
+
+              // Read the object data from the stream
+              const bodyContents = await streamToString(data.Body);
+
+              // Parse and return the JSON content
+              const truthSets = JSON.parse(bodyContents);
+
+              return {
+                statusCode: 200,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Access-Control-Allow-Origin': '*'
+                },
+                body: JSON.stringify(truthSets),
+              };
+            } catch (error) {
+              console.error('Error fetching data from S3:', error);
+              return {
+                statusCode: 500,
+                body: JSON.stringify({ error: 'Failed to retrieve truth sets.' }),
+              };
+            }
+          };
+
+          // Utility function to convert a readable stream to a string
+          const streamToString = (stream) =>
+            new Promise((resolve, reject) => {
+              const chunks = [];
+              stream.on("data", (chunk) => chunks.push(chunk));
+              stream.on("error", reject);
+              stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+            });
+
+
+  TruthBackendApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: truth-backend-api
+      EndpointConfiguration:
+        Types: 
+          - EDGE
+
+  TruthBackendApiResourceTruthSets:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt TruthBackendApi.RootResourceId
+      PathPart: truth-sets
+      RestApiId: !Ref TruthBackendApi
+
+  TruthBackendApiMethodGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: GET
+      ResourceId: !Ref TruthBackendApiResourceTruthSets
+      RestApiId: !Ref TruthBackendApi
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${TruthBackendFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Enable CORS (this is another way to ensure that the resource allows OPTIONS request)
+  TruthBackendApiMethodOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref TruthBackendApi
+      ResourceId: !Ref TruthBackendApiResourceTruthSets
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        RequestTemplates:
+          application/json: "{statusCode:200}"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  TruthBackendApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TruthBackendFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TruthBackendApi}/*/GET/truth-sets"
+
+  TruthBackendApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - TruthBackendApiMethodGet
+      - TruthBackendApiMethodOptions
+    Properties:
+      RestApiId: !Ref TruthBackendApi
+      StageName: prod
+
+Outputs:
+  ApiEndpoint:
+    Description: "Invoke URL of the truth-backend-api"
+    Value: !Sub "https://${TruthBackendApi}.execute-api.${AWS::Region}.amazonaws.com/prod/truth-sets"
