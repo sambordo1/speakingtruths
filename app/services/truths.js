@@ -18,6 +18,8 @@ export default class TruthsService extends Service {
 
   getNextTruth(lieNumber) {
     let lie = lieNumber.toString();
+    
+    // If we haven't yet shuffled the truths for this lie, do it now
     if (!this.shuffledTruthsMap[lie]) {
       this.shuffledTruthsMap[lie] = shuffleArray([...this.truthSets[lie]]);
       this.truthIndexMap[lie] = 0;

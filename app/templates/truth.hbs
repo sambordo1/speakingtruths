@@ -1,13 +1,19 @@
 <header>
-    <LinkTo @route="index">
+  <LinkTo @route="index">
     <img src="/logo.png" alt="truth" class="logo">
-    </LinkTo>
+  </LinkTo>
   <h1 class="header-title">Truth</h1>
 </header>
+
 <div class="container">
   <div class="column">
-    <div id="truth-item" class="truth-item">
-      {{this.model.truth}}
+    <div class="truth-item">
+      <div class="reference">
+        {{this.model.truth.reference}}
+      </div>
+      <div class="verse">
+        {{this.model.truth.verses}}
+      </div>
     </div>
   </div>
 </div>

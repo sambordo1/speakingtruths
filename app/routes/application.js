@@ -7,6 +7,9 @@ export default class ApplicationRoute extends Route {
   async model() {
     let response = await fetch('https://lx1rlncjik.execute-api.us-east-1.amazonaws.com/prod/truth-sets'); 
     let data = await response.json();
+
+    console.log('Fetched data:', data)
+
     this.truths.setTruthSets(data); // Store in service
     return data;
   }

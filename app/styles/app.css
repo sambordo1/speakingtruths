@@ -11,6 +11,11 @@ body {
     min-height: 100vh;
 }
 
+/* Remove underline from LinkTo (anchor) tags */
+a {
+    text-decoration: none;
+}
+
 /* Header */
 header {
     width: 100%;
@@ -97,6 +102,17 @@ header {
     color: white;
     text-align: center;
 }
+
+.reference {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.verse {
+    white-space: pre-wrap; /* preserve line breaks from \n */
+    /* additional styling if desired */
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {
