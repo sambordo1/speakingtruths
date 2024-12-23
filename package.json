@@ -22,17 +22,21 @@
     "lint:js:fix": "eslint . --fix",
     "start": "ember serve",
     "test": "concurrently \"npm:lint\" \"npm:test:*\" --names \"lint,test:\"",
-    "test:ember": "ember test"
+    "test:ember": "ember test",
+    "bdd": "cucumber-js tests/bdd/features --require tests/bdd/steps/**/*.js --require tests/bdd/support/**/*.js"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/eslint-parser": "^7.23.10",
     "@babel/plugin-proposal-decorators": "^7.24.0",
+    "@cucumber/cucumber": "^11.1.1",
     "@ember/optional-features": "^2.1.0",
     "@ember/string": "^3.1.1",
     "@ember/test-helpers": "^3.3.0",
     "@glimmer/component": "^1.1.2",
     "@glimmer/tracking": "^1.1.2",
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^22.10.2",
     "broccoli-asset-rev": "^3.0.0",
     "concurrently": "^8.2.2",
     "ember-auto-import": "^2.7.2",

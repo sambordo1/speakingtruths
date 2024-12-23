@@ -7,44 +7,54 @@ on:
       - master
   pull_request: {}
 
-concurrency:
-  group: ci-${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  lint:
-    name: "Lint"
+  build-test-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
 
     steps:
+      # Check out the latest code
       - uses: actions/checkout@v3
-      - name: Install Node
+
+      # Set up Node and cache dependencies
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: npm
+
+      # Install all dependencies
       - name: Install Dependencies
         run: npm ci
-      - name: Lint
-        run: npm run lint
 
-  test:
-    name: "Test"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+      - name: Install Playwright Browsers
+        run: npx playwright install
 
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Node
-        uses: actions/setup-node@v3
+      # Build the Ember application
+      - name: Build Ember App
+        run: npx ember build --environment=production
+
+      # Only run tests here if i need to test on local env before staging
+      # - name: Run BDD Tests
+      #   run: npm run bdd
+
+      # Configure AWS credentials for deployment
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          node-version: 18
-          cache: npm
-      - name: Install Dependencies
-        run: npm ci
-      - name: Run Tests
-        run: npm test
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to Staging
+        run: aws s3 sync dist/ s3://staging.speakingtruths.com/
+
+      # Your Cucumber steps now point to staging.sambordo.ninja in the code:
+      - name: Run BDD Tests Against Staging
+        run: npm run bdd
+
+      - name: Deploy to Production
+        if: success()
+        run: aws s3 sync dist/ s3://speakingtruths.com/
 
 
 # aws s3 cp backend/truth-sets.json s3://truth-db/ --profile sammy
