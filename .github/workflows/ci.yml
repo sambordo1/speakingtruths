@@ -49,7 +49,7 @@ jobs:
         run: aws s3 sync dist/ s3://staging.speakingtruths.com/
 
       - name: push truth sets to S3
-        run: aws s3 cp backend/truth-sets.json s3://truth-db/
+        run: aws s3 cp backend/truth-sets.json s3://truth-backend-bucket/
 
       # Your Cucumber steps now point to staging in the code:
       - name: Run BDD Tests Against Staging
