@@ -48,15 +48,13 @@ jobs:
       - name: Deploy to Staging
         run: aws s3 sync dist/ s3://staging.speakingtruths.com/
 
-      # Your Cucumber steps now point to staging.sambordo.ninja in the code:
+      - name: push truth sets to S3
+        run: aws s3 cp backend/truth-sets.json s3://truth-db/
+
+      # Your Cucumber steps now point to staging in the code:
       - name: Run BDD Tests Against Staging
         run: npm run bdd
 
       - name: Deploy to Production
         if: success()
         run: aws s3 sync dist/ s3://speakingtruths.com/
-
-
-# aws s3 cp backend/truth-sets.json s3://truth-db/ --profile sammy
-# ember build --environment=production
-# aws s3 sync dist/ s3://speakingtruths.com/ --profile sammy

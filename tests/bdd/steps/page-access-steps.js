@@ -6,7 +6,7 @@ Given('I am a visitor', async () => {
 });
 
 When('I navigate to the homepage', async function () {
-  await this.page.goto('http://speakingtruths.com/');
+  await this.page.goto('http://staging.speakingtruths.com/');
 });
 
 Then('I should see the title {string}', async function (expectedTitle) {
