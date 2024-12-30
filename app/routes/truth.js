@@ -6,11 +6,14 @@ export default class TruthRoute extends Route {
 
   model(params) {
     let lieNumber = parseInt(params.lie_number, 10);
-    // Get the next truth for this lie
-    let nextTruth = this.truths.getNextTruth(lieNumber);
+    let singleTruth = this.truths.getNextTruth(lieNumber);         // one shuffled verse
+    let allTruths = this.truths.getAllTruthsForLie(lieNumber);     // full array
+
     return {
       lieNumber,
-      truth: nextTruth
+      truth: singleTruth,  // { reference, verses }
+      allTruths            // [ { reference, verses }, { reference, verses }, ... ]
     };
   }
 }
+

@@ -5,15 +5,48 @@
   <h1 class="header-title">Truth</h1>
 </header>
 
-<div class="container">
+{{!-- Add position-relative here --}}
+<div class="container position-relative">
   <div class="column">
-    <div class="truth-item">
-      <div class="reference">
-        {{this.model.truth.reference}}
+
+    {{#unless this.showAll}}
+      <div class="truth-item">
+        <div class="reference">
+          {{this.model.truth.reference}}
+        </div>
+        <div class="verse">
+          {{this.model.truth.verses}}
+        </div>
       </div>
-      <div class="verse">
-        {{this.model.truth.verses}}
-      </div>
-    </div>
+    {{/unless}}
+
+    {{!-- Combine black-button + small-button classes --}}
+    <button
+      type="button"
+      class="button black-button small-button"
+      {{on 'click' this.toggleShowAll}}
+    >
+      {{#if this.showAll}}
+        Show Single Scripture
+      {{else}}
+        List All Scriptures
+      {{/if}}
+    </button>
+
+    {{#if this.showAll}}
+      <ul class="all-truths">
+        {{#each this.model.allTruths as |truthObj|}}
+          <li class="truth-item">
+            <div class="reference">
+              {{truthObj.reference}}
+            </div>
+            <div class="verse">
+              {{truthObj.verses}}
+            </div>
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
+
   </div>
 </div>

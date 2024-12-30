@@ -39,4 +39,10 @@ export default class TruthsService extends Service {
     this.truthIndexMap[lie] = index;
     return nextTruth;
   }
+
+  getAllTruthsForLie(lieNumber) {
+    // Simply returns the entire array for that lie
+    let lieKey = lieNumber.toString();
+    return this.truthSets[lieKey] || [];
+  }
 }

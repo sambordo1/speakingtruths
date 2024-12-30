@@ -130,3 +130,41 @@ header {
         height: 80px;
     }
 }
+
+.black-button {
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 15px 0;
+}
+
+.black-button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Allows you to position elements absolutely within the container */
+.position-relative {
+    position: relative;
+  }
+  
+  /* Smaller size and absolute positioning for the button */
+  .small-button {
+    width: auto;        /* override the 100% width */
+    max-width: none;
+    display: inline-block; 
+    font-size: 0.9em;          /* Smaller font */
+    padding: 2px 5px;         /* Less padding */
+    border-radius: 5px;        /* Slightly smaller border radius */
+    border: 2px solid black;   /* If you want a thinner border */
+    
+    position: absolute;        /* Position absolutely within the container */
+    top: 20px;                 /* Distance from top of the container */
+    right: 10px;               /* Distance from right side of the container */
+    margin: 0;                 /* Remove default margins if any */
+  }
+  
