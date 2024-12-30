@@ -91,16 +91,15 @@ header {
 
 /* Truth Item Styles */
 .truth-item {
-    width: 100%; /* Make truth items full-width */
-    max-width: 400px; /* Set a max width to prevent items from becoming too wide */
+    width: auto;
+    max-width: 500px; /* Set a max width to prevent items from becoming too wide */
     padding: 20px;
-    margin: 15px 0; /* Space between items */
+    margin: 15px auto; /* Space between items */
     font-size: 1.5em;
     border: black 2px solid;
     border-radius: 10px;
     background-color: #3498db;
     color: white;
-    text-align: center;
 }
 
 .reference {
@@ -109,8 +108,8 @@ header {
 }
 
 .verse {
-    white-space: pre-wrap; /* preserve line breaks from \n */
-    /* additional styling if desired */
+    text-align: left;
+    white-space: pre-line;
 }
 
 
