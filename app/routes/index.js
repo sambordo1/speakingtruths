@@ -3,7 +3,7 @@ import Route from '@ember/routing/route';
 export default class IndexRoute extends Route {
   model() {
     return [
-      { id: 1, text: 'Waiting on God is futile' },
+      { id: 1, text: 'Waiting on God is pointless' },
       { id: 2, text: 'There is No Hope' },
       { id: 3, text: 'God does not love me' },
       { id: 4, text: 'God does not answer my prayers' },
